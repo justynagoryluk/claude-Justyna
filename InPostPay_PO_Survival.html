@@ -1760,11 +1760,13 @@ function getLeaderboard() {
 }
 
 function saveScore(pts) {
-  const lb = getLeaderboard();
-  lb.push({ score: pts, date: new Date().toLocaleDateString() });
-  lb.sort((a,b) => b.score - a.score);
-  lb.splice(5);
-  localStorage.setItem('inpostpo_lb', JSON.stringify(lb));
+  try {
+    const lb = getLeaderboard();
+    lb.push({ score: pts, date: new Date().toLocaleDateString() });
+    lb.sort((a,b) => b.score - a.score);
+    lb.splice(5);
+    localStorage.setItem('inpostpo_lb', JSON.stringify(lb));
+  } catch(e) {}
 }
 
 function buildLeaderboardHTML() {
@@ -1914,14 +1916,12 @@ function goHome() {
 // ============================================================
 // INIT
 // ============================================================
-renderLeaderboardPreview();
-
-// Assign canvas refs for initial onclick binding
-boardCanvas = document.getElementById('boardCanvas');
-
-// Keyboard hint for start screen
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !gameRunning) startGame();
+window.addEventListener('DOMContentLoaded', () => {
+  try { renderLeaderboardPreview(); } catch(e) {}
+  boardCanvas = document.getElementById('boardCanvas');
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !gameRunning) startGame();
+  });
 });
 </script>
 </body>
