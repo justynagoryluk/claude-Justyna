@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InPost Pay: Product Owner Survival</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #1A1A2E;
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== START SCREEN ===== */
+  #startScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    width: 100%;
+  }
+
+  #startScreen .logo-wrap { margin-bottom: 20px; }
+
+  #startScreen h1 {
+    font-size: 2.2rem;
+    color: #FFD100;
+    text-shadow: 0 0 18px #FFD10088;
+    margin-bottom: 4px;
+    letter-spacing: 2px;
+  }
+
+  #startScreen .subtitle {
+    color: #FF00FF;
+    font-size: 1rem;
+    letter-spacing: 4px;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+
+  .start-btn {
+    background: #FFD100;
+    color: #1A1A2E;
+    border: none;
+    padding: 14px 42px;
+    font-size: 1.3rem;
+    font-weight: 900;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    box-shadow: 0 0 24px #FFD10066;
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-bottom: 28px;
+  }
+  .start-btn:hover { transform: scale(1.06); box-shadow: 0 0 40px #FFD100aa; }
+
+  .instructions {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #FFD10044;
+    border-radius: 10px;
+    padding: 16px 28px;
+    max-width: 480px;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: #ccc;
+  }
+  .instructions b { color: #FFD100; }
+
+  .leaderboard-preview {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #FF00FF44;
+    border-radius: 10px;
+    padding: 14px 28px;
+    min-width: 280px;
+  }
+  .leaderboard-preview h3 { color: #FF00FF; margin-bottom: 10px; font-size: 1rem; letter-spacing: 2px; }
+  .lb-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.9rem; color: #ddd; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-rank { color: #FFD100; font-weight: bold; width: 24px; }
+
+  /* ===== GAME SCREEN ===== */
+  #gameScreen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding-bottom: 20px;
+  }
+
+  #topBar {
+    width: 100%;
+    background: linear-gradient(90deg, #FFD100 0%, #1A1A2E 30%, #1A1A2E 70%, #FFD100 100%);
+    padding: 8px 20px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 1rem;
+    color: #1A1A2E;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    position: relative;
+  }
+  #topBar span { color: #1A1A2E; }
+  #topBar .sprint-label { color: #1A1A2E; }
+
+  #gameArea {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    margin-top: 12px;
+    position: relative;
+  }
+
+  #boardCanvas {
+    border: 3px solid #FFD100;
+    box-shadow: 0 0 30px #FFD10044, inset 0 0 20px rgba(0,0,0,0.5);
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 160px;
+  }
+
+  .panel {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #FFD10055;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .panel-title {
+    color: #FFD100;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .panel-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+  }
+  .lives-display { font-size: 1.4rem; letter-spacing: 4px; }
+
+  #nextCanvas {
+    border: 1px solid #FFD10033;
+    border-radius: 6px;
+    display: block;
+    margin-top: 4px;
+  }
+
+  .sound-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid #FFD10055;
+    color: #FFD100;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: background 0.2s;
+    width: 100%;
+  }
+  .sound-btn:hover { background: rgba(255,209,0,0.18); }
+
+  .pause-btn {
+    background: rgba(255,0,255,0.1);
+    border: 1px solid #FF00FF55;
+    color: #FF00FF;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .pause-btn:hover { background: rgba(255,0,255,0.22); }
+
+  /* Controls hint */
+  .controls-hint {
+    font-size: 0.72rem;
+    color: #888;
+    line-height: 1.8;
+    padding: 8px 0;
+  }
+  .controls-hint b { color: #FFD100; }
+
+  /* ===== TOAST ===== */
+  #toast {
+    position: fixed;
+    top: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FF00FF, #FFD100);
+    color: #1A1A2E;
+    font-weight: 900;
+    font-size: 1rem;
+    padding: 10px 28px;
+    border-radius: 30px;
+    box-shadow: 0 4px 24px rgba(255,0,255,0.5);
+    z-index: 9999;
+    display: none;
+    max-width: 90vw;
+    text-align: center;
+    letter-spacing: 1px;
+    pointer-events: none;
+  }
+
+  /* ===== OVERLAYS ===== */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .overlay h2 {
+    color: #FFD100;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    text-shadow: 0 0 20px #FFD10066;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+  .overlay p {
+    color: #ccc;
+    margin-bottom: 18px;
+    font-size: 0.95rem;
+    text-align: center;
+    max-width: 400px;
+  }
+  .overlay-timer {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #FF00FF;
+    margin-bottom: 16px;
+    text-shadow: 0 0 14px #FF00FF88;
+  }
+
+  /* Memory Card Game */
+  #memoryOverlay { display: none; }
+  #memoryGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 64px);
+    grid-template-rows: repeat(4, 64px);
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .mem-card {
+    width: 64px;
+    height: 64px;
+    background: rgba(255,209,0,0.1);
+    border: 2px solid #FFD10066;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    user-select: none;
+    position: relative;
+  }
+  .mem-card:hover:not(.flipped):not(.matched) { background: rgba(255,209,0,0.2); transform: scale(1.04); }
+  .mem-card .card-face { display: none; }
+  .mem-card.flipped .card-face, .mem-card.matched .card-face { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+  .mem-card.flipped { background: rgba(255,209,0,0.25); border-color: #FFD100; }
+  .mem-card.matched { background: rgba(52,168,83,0.3); border-color: #34A853; cursor: default; }
+  .mem-card.wrong { background: rgba(234,67,53,0.3); border-color: #EA4335; animation: shake 0.3s; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* QBR Quiz */
+  #qbrOverlay { display: none; }
+  #qbrCanvas {
+    border: 1px solid #FFD10033;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 12px 0;
+  }
+
+  /* Pause Overlay */
+  #pauseOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.92);
+    z-index: 800;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    backdrop-filter: blur(3px);
+  }
+  #pauseOverlay h2 { color: #FFD100; font-size: 2.5rem; letter-spacing: 6px; }
+  #pauseOverlay p { color: #888; margin-top: 10px; }
+
+  /* Game Over / Sprint Complete */
+  #gameOverOverlay { display: none; }
+  #sprintOverlay { display: none; }
+
+  .score-final { font-size: 3rem; font-weight: 900; color: #FFD100; margin: 12px 0; text-shadow: 0 0 24px #FFD10088; }
+  .action-btn {
+    background: #FFD100;
+    color: #1A1A2E;
+    border: none;
+    padding: 12px 36px;
+    font-size: 1.1rem;
+    font-weight: 900;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    margin: 6px;
+    transition: transform 0.1s;
+  }
+  .action-btn:hover { transform: scale(1.05); }
+  .action-btn.secondary {
+    background: transparent;
+    border: 2px solid #FF00FF;
+    color: #FF00FF;
+  }
+
+  .status-bar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #FFD10022;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    color: #aaa;
+    margin-top: 8px;
+    max-width: 540px;
+    text-align: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .status-bar .event-label { color: #FF00FF; font-weight: 700; }
+
+  .lb-final { margin: 14px 0; width: 300px; }
+  .lb-final .lb-row { padding: 5px 0; }
+
+  /* Sprint celebration */
+  .confetti-wrap { font-size: 2rem; margin-bottom: 8px; letter-spacing: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ===== START SCREEN ===== -->
+<div id="startScreen">
+  <div class="logo-wrap">
+    <svg width="320" height="140" viewBox="0 0 320 140" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background panel -->
+      <rect width="320" height="140" rx="16" fill="#1A1A2E"/>
+      <rect x="2" y="2" width="316" height="136" rx="14" fill="none" stroke="#FFD100" stroke-width="2"/>
+
+      <!-- Tetris block decorations (left) -->
+      <rect x="10" y="10" width="20" height="20" rx="3" fill="#4285F4" opacity="0.9"/>
+      <rect x="10" y="32" width="20" height="20" rx="3" fill="#FFD100" opacity="0.9"/>
+      <rect x="10" y="54" width="20" height="20" rx="3" fill="#EA4335" opacity="0.9"/>
+      <rect x="10" y="76" width="20" height="20" rx="3" fill="#9B59B6" opacity="0.9"/>
+      <rect x="32" y="10" width="20" height="20" rx="3" fill="#34A853" opacity="0.9"/>
+      <rect x="32" y="32" width="20" height="20" rx="3" fill="#FF00FF" opacity="0.7"/>
+      <rect x="32" y="54" width="20" height="20" rx="3" fill="#4285F4" opacity="0.6"/>
+
+      <!-- Tetris block decorations (right) -->
+      <rect x="278" y="10" width="20" height="20" rx="3" fill="#9B59B6" opacity="0.9"/>
+      <rect x="278" y="32" width="20" height="20" rx="3" fill="#EA4335" opacity="0.9"/>
+      <rect x="278" y="54" width="20" height="20" rx="3" fill="#FFD100" opacity="0.9"/>
+      <rect x="278" y="76" width="20" height="20" rx="3" fill="#4285F4" opacity="0.9"/>
+      <rect x="256" y="10" width="20" height="20" rx="3" fill="#34A853" opacity="0.9"/>
+      <rect x="256" y="32" width="20" height="20" rx="3" fill="#FF00FF" opacity="0.7"/>
+      <rect x="256" y="54" width="20" height="20" rx="3" fill="#9B59B6" opacity="0.6"/>
+
+      <!-- InPost Pay text -->
+      <text x="160" y="58" text-anchor="middle" font-family="Arial Black, Arial" font-weight="900" font-size="32" fill="#FFD100" letter-spacing="2">InPost Pay</text>
+      <text x="160" y="80" text-anchor="middle" font-family="Arial, sans-serif" font-weight="400" font-size="13" fill="#FF00FF" letter-spacing="8">PRODUCT OWNER</text>
+      <text x="160" y="100" text-anchor="middle" font-family="Arial Black, Arial" font-weight="900" font-size="22" fill="#ffffff" letter-spacing="4">SURVIVAL</text>
+
+      <!-- Bottom decoration line -->
+      <line x1="60" y1="115" x2="260" y2="115" stroke="#FFD100" stroke-width="1.5" opacity="0.4"/>
+      <text x="160" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#888" letter-spacing="3">Q2 2026 RELEASE EDITION</text>
+    </svg>
+  </div>
+
+  <h1>PO Survival</h1>
+  <div class="subtitle">Sprint Planning Edition</div>
+
+  <button class="start-btn" onclick="startGame()">▶ START SPRINT</button>
+
+  <div class="instructions">
+    <b>Controls:</b> ← → Move &nbsp;|&nbsp; ↑ Rotate &nbsp;|&nbsp; ↓ Soft drop &nbsp;|&nbsp; Space Hard drop &nbsp;|&nbsp; P Pause<br><br>
+    <b>Pieces:</b> Android App (I) · iOS App (O) · Payment Gateway (L) · Basket App (S) · Merchant Onboarding (T)<br><br>
+    <b>Beware:</b> Stakeholder chaos events will interrupt your sprint! Match cards, click bugs, survive the QBR quiz, and don't let UniCredit block your roadmap.
+  </div>
+
+  <div class="leaderboard-preview">
+    <h3>🏆 Leaderboard</h3>
+    <div id="lbPreview"></div>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="gameScreen">
+  <div id="topBar"><span id="sprintLabel">Sprint 1 — Q2 2026 Release</span></div>
+
+  <div id="gameArea">
+    <canvas id="boardCanvas" width="320" height="640"></canvas>
+
+    <div id="sidebar">
+      <div class="panel">
+        <div class="panel-title">Score</div>
+        <div class="panel-value" id="scoreDisplay">0</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Lives</div>
+        <div class="lives-display" id="livesDisplay">❤️❤️❤️</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Sprint</div>
+        <div class="panel-value" id="sprintDisplay">1</div>
+        <div style="font-size:0.75rem;color:#888;margin-top:2px;">Lines: <span id="linesDisplay">0</span>/10</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Next Piece</div>
+        <canvas id="nextCanvas" width="120" height="100"></canvas>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Controls</div>
+        <div class="controls-hint">
+          <b>←→</b> Move<br>
+          <b>↑</b> Rotate<br>
+          <b>↓</b> Soft Drop<br>
+          <b>Space</b> Hard Drop<br>
+          <b>P</b> Pause
+        </div>
+      </div>
+      <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔊 Sound ON</button>
+      <button class="pause-btn" onclick="togglePause()">⏸ Pause</button>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <span>Status: <span class="event-label" id="statusLabel">All Systems Go</span></span>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<!-- ===== PAUSE OVERLAY ===== -->
+<div id="pauseOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,26,46,0.92);z-index:800;align-items:center;justify-content:center;flex-direction:column;backdrop-filter:blur(3px);">
+  <h2 style="color:#FFD100;font-size:2.5rem;letter-spacing:6px;">PAUSED</h2>
+  <p style="color:#888;margin-top:10px;">Press P to resume</p>
+</div>
+
+<!-- ===== MEMORY CARD OVERLAY ===== -->
+<div id="memoryOverlay" class="overlay" style="display:none;">
+  <h2>⚡ Ad Hoc Task!</h2>
+  <p>Match all payment pairs to handle the ad hoc request!<br><b style="color:#FF00FF">You have 30 seconds.</b></p>
+  <div class="overlay-timer" id="memTimer">30</div>
+  <div id="memoryGrid"></div>
+  <p id="memStatus" style="color:#FFD100;font-weight:700;font-size:1rem;min-height:24px;margin-top:4px;"></p>
+</div>
+
+<!-- ===== QBR QUIZ OVERLAY ===== -->
+<div id="qbrOverlay" class="overlay" style="display:none;">
+  <h2>📊 QBR Quiz!</h2>
+  <p>Which metric has the highest value? Click the correct bar!<br><b style="color:#FF00FF">10 seconds to answer.</b></p>
+  <div class="overlay-timer" id="qbrTimer">10</div>
+  <canvas id="qbrCanvas" width="380" height="220"></canvas>
+  <p id="qbrStatus" style="color:#FFD100;font-weight:700;font-size:1rem;min-height:24px;margin-top:4px;"></p>
+</div>
+
+<!-- ===== MINESWEEPER OVERLAY ===== -->
+<div id="minesweeperOverlay" class="overlay" style="display:none;">
+  <h2>💣 Rozminuj Napięcie!</h2>
+  <p>Odkryj wszystkie bezpieczne pola zanim wybuchnie konflikt w zespole!<br><b style="color:#FF00FF">Czas: <span id="mineTimer">45</span>s — Miny: <span id="mineCount">6</span></b></p>
+  <div id="mineGrid" style="display:grid;grid-template-columns:repeat(7,40px);gap:3px;margin:12px auto;width:fit-content;"></div>
+  <p id="mineStatus" style="color:#FFD100;font-weight:700;font-size:1rem;min-height:24px;margin-top:4px;"></p>
+</div>
+
+<!-- ===== SPRINT COMPLETE OVERLAY ===== -->
+<div id="sprintOverlay" class="overlay" style="display:none;">
+  <div class="confetti-wrap">🎉🏆🎉</div>
+  <h2>SPRINT COMPLETE!</h2>
+  <p id="sprintMsg">Features shipped on time!</p>
+  <div class="score-final" id="sprintScore"></div>
+  <button class="action-btn" onclick="continueGame()">Continue to Sprint <span id="nextSprintNum">2</span> →</button>
+</div>
+
+<!-- ===== GAME OVER OVERLAY ===== -->
+<div id="gameOverOverlay" class="overlay" style="display:none;">
+  <h2 style="color:#EA4335;">😱 Product Delayed!</h2>
+  <p style="color:#FF6B6B;font-size:1.1rem;font-weight:700;">"Board is not happy."</p>
+  <div class="score-final" id="finalScore"></div>
+  <div class="lb-final" id="lbFinal"></div>
+  <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;justify-content:center;">
+    <button class="action-btn" onclick="restartGame()">🔄 Try Again</button>
+    <button class="action-btn secondary" onclick="goHome()">🏠 Main Menu</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONSTANTS
+// ============================================================
+const COLS = 10, ROWS = 20, BS = 32;
+const COLORS = {
+  I: '#4285F4', O: '#34A853', L: '#FFD100', S: '#EA4335', T: '#9B59B6'
+};
+const PIECE_NAMES = { I: 'Android App', O: 'iOS App', L: 'Payment Gateway', S: 'Basket App', T: 'Merchant Onboarding' };
+
+const SHAPES = {
+  I: [[[1,1,1,1]], [[1],[1],[1],[1]]],
+  O: [[[1,1],[1,1]]],
+  L: [[[1,0],[1,0],[1,1]], [[1,1,1],[1,0,0]], [[1,1],[0,1],[0,1]], [[0,0,1],[1,1,1]]],
+  S: [[[0,1,1],[1,1,0]], [[1,0],[1,1],[0,1]]],
+  T: [[[1,1,1],[0,1,0]], [[0,1],[1,1],[0,1]], [[0,1,0],[1,1,1]], [[1,0],[1,1],[1,0]]]
+};
+
+const PIECE_TYPES = ['I','O','L','S','T'];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let board = [];
+let currentPiece = null;
+let nextPiece = null;
+let score = 0;
+let lives = 3;
+let sprint = 1;
+let linesCleared = 0;
+let totalLines = 0;
+let fallSpeed = 800; // ms
+let lastFall = 0;
+let gameRunning = false;
+let gamePaused = false;
+let modalOpen = false;
+let animFrame = null;
+let lastTime = 0;
+let soundEnabled = true;
+let audioCtx = null;
+
+// Chaos event state
+let chaosQueue = [];
+let nextChaosTime = 0;
+let chaosActive = {};
+let unicreditCells = [];
+let unicreditTimer = 0;
+let unicreditInterval = null;
+let speedRushTimer = 0;
+let speedRushTimeout = null;
+let scopeCreepTimer = 0;
+let scopeCreepTimeout = null;
+let merchantBlockedTimer = 0;
+let merchantBlockedTimeout = null;
+let buggyCells = [];
+let buggyFixRequired = false;
+let bugGracePeriod = false;
+let hotfixCell = null;
+let hotfixTimeout = null;
+let poisonedCells = [];
+let gameStartTime = 0;
+let firstChaosTriggered = false;
+
+// Canvas refs
+let boardCanvas, boardCtx, nextCanvas, nextCtx;
+
+// ============================================================
+// AUDIO
+// ============================================================
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function playBeep(freq = 440, duration = 0.08, type = 'square', vol = 0.15) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function playMove() { playBeep(220, 0.04, 'square', 0.1); }
+function playRotate() { playBeep(330, 0.06, 'square', 0.12); }
+function playDrop() { playBeep(180, 0.1, 'sawtooth', 0.12); }
+function playLineClear() {
+  [440,550,660,880].forEach((f,i) => {
+    setTimeout(() => playBeep(f, 0.1, 'sine', 0.18), i*60);
+  });
+}
+function playChaos() { playBeep(80, 0.3, 'sawtooth', 0.2); }
+function playWin() { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playBeep(f,0.15,'sine',0.18),i*80)); }
+function playLoseLife() { [220,180,140,100].forEach((f,i)=>setTimeout(()=>playBeep(f,0.12,'sawtooth',0.18),i*70)); }
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundBtn').textContent = soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+}
+
+// ============================================================
+// BOARD
+// ============================================================
+function createBoard() {
+  board = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+}
+
+function createPiece(type) {
+  if (!type) {
+    // Filter out T if blocked
+    let available = [...PIECE_TYPES];
+    if (chaosActive.merchantBlocked) {
+      available = available.filter(t => t !== 'T');
+      if (available.length === 0) available = PIECE_TYPES.filter(t => t !== 'T');
+    }
+    type = available[Math.floor(Math.random() * available.length)];
+  }
+  const shape = SHAPES[type];
+  return {
+    type, color: COLORS[type],
+    shape: shape[0],
+    rotIndex: 0,
+    allRots: shape,
+    x: Math.floor((COLS - shape[0][0].length) / 2),
+    y: 0
+  };
+}
+
+function rotatePiece(piece) {
+  const newRot = (piece.rotIndex + 1) % piece.allRots.length;
+  const newShape = piece.allRots[newRot];
+  return { ...piece, shape: newShape, rotIndex: newRot };
+}
+
+function isValid(piece, dx = 0, dy = 0, shape = null) {
+  const s = shape || piece.shape;
+  for (let r = 0; r < s.length; r++) {
+    for (let c = 0; c < s[r].length; c++) {
+      if (!s[r][c]) continue;
+      const nx = piece.x + c + dx;
+      const ny = piece.y + r + dy;
+      if (nx < 0 || nx >= COLS || ny >= ROWS) return false;
+      if (ny >= 0 && board[ny][nx]) return false;
+    }
+  }
+  return true;
+}
+
+function placePiece(piece) {
+  const s = piece.shape;
+  for (let r = 0; r < s.length; r++) {
+    for (let c = 0; c < s[r].length; c++) {
+      if (!s[r][c]) continue;
+      const nx = piece.x + c;
+      const ny = piece.y + r;
+      if (ny < 0) { triggerGameOver(); return; }
+      board[ny][nx] = { color: piece.color, pieceType: piece.type, poisoned: false };
+    }
+  }
+  playDrop();
+  checkBugsOnPlace();
+  checkUniCreditCollision(piece);
+  clearLines();
+}
+
+function checkBugsOnPlace() {
+  // Bug penalty is now handled by the 8-second grace period timeout in chaosBugReport
+}
+
+function checkUniCreditCollision(piece) {
+  if (unicreditCells.length === 0) return;
+  // Check if piece landed directly above any unicredit cell
+  const s = piece.shape;
+  for (let r = 0; r < s.length; r++) {
+    for (let c = 0; c < s[r].length; c++) {
+      if (!s[r][c]) continue;
+      const nx = piece.x + c;
+      const ny = piece.y + r;
+      // check if ny+1 is a unicredit cell
+      for (const uc of unicreditCells) {
+        if (uc.x === nx && uc.y === ny + 1) {
+          loseLife("Piece landed on UniCredit block! 🔒");
+          return;
+        }
+      }
+    }
+  }
+}
+
+// ============================================================
+// SCOPE CREEP: double width of falling piece
+// ============================================================
+function applyScope(shape) {
+  // Each row: [1,0,1] -> [1,1,0,0,1,1]
+  return shape.map(row => {
+    const newRow = [];
+    for (const cell of row) newRow.push(cell, cell);
+    return newRow;
+  });
+}
+
+// ============================================================
+// LINE CLEAR
+// ============================================================
+function clearLines() {
+  let cleared = 0;
+  const toFlash = [];
+
+  for (let r = ROWS - 1; r >= 0; r--) {
+    let full = true;
+    for (let c = 0; c < COLS; c++) {
+      const cell = board[r][c];
+      if (!cell) { full = false; break; }
+      // poisoned cells can't contribute
+      if (cell.poisoned) { full = false; break; }
+      // unicredit cells break the line
+      let isUC = unicreditCells.some(u => u.x === c && u.y === r);
+      if (isUC) { full = false; break; }
+    }
+    if (full) toFlash.push(r);
+  }
+
+  if (toFlash.length === 0) {
+    spawnNext();
+    return;
+  }
+
+  // Flash animation then clear
+  flashRows(toFlash, () => {
+    toFlash.sort((a,b) => b - a);
+    for (const r of toFlash) {
+      board.splice(r, 1);
+      board.unshift(Array(COLS).fill(null));
+    }
+    cleared = toFlash.length;
+    score += cleared * 100;
+    linesCleared += cleared;
+    totalLines += cleared;
+    updateUI();
+    showToast(`✅ Feature Shipped! +${cleared * 100} pts`);
+    playLineClear();
+
+    if (linesCleared >= 10) {
+      linesCleared -= 10;
+      triggerSprintComplete();
+      return;
+    }
+    spawnNext();
+  });
+}
+
+function flashRows(rows, cb) {
+  let count = 0;
+  const MAX = 4;
+  function flash() {
+    count++;
+    // toggle flash color
+    for (const r of rows) {
+      for (let c = 0; c < COLS; c++) {
+        if (board[r][c]) {
+          board[r][c]._flash = (count % 2 === 1);
+        }
+      }
+    }
+    drawBoard();
+    if (count < MAX) setTimeout(flash, 80);
+    else { for(const r of rows) for(let c=0;c<COLS;c++) { if(board[r][c]) board[r][c]._flash=false; } cb(); }
+  }
+  flash();
+}
+
+function spawnNext() {
+  currentPiece = nextPiece || createPiece();
+  // Apply scope creep if active
+  if (chaosActive.scopeCreep) {
+    const scopedShape = applyScope(currentPiece.allRots[0]);
+    currentPiece = { ...currentPiece, shape: scopedShape, allRots: currentPiece.allRots.map(applyScope) };
+  }
+  // Handle merchant blocked
+  if (chaosActive.merchantBlocked && currentPiece.type === 'T') {
+    currentPiece = createPiece();
+    currentPiece.color = '#888';
+    showToast('🔒 T-piece locked (Integration team unavailable)');
+  }
+  nextPiece = createPiece();
+  currentPiece.x = Math.floor((COLS - currentPiece.shape[0].length) / 2);
+  currentPiece.y = 0;
+  if (!isValid(currentPiece)) {
+    triggerGameOver();
+    return;
+  }
+  drawNextPiece();
+}
+
+// ============================================================
+// GHOST PIECE
+// ============================================================
+function getGhostY() {
+  if (!currentPiece) return 0;
+  let dy = 0;
+  while (isValid(currentPiece, 0, dy + 1)) dy++;
+  return currentPiece.y + dy;
+}
+
+// ============================================================
+// DRAW
+// ============================================================
+function drawBoard() {
+  boardCtx.fillStyle = '#0D0D1E';
+  boardCtx.fillRect(0, 0, COLS * BS, ROWS * BS);
+
+  // Grid lines
+  boardCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+  boardCtx.lineWidth = 0.5;
+  for (let r = 0; r <= ROWS; r++) {
+    boardCtx.beginPath();
+    boardCtx.moveTo(0, r * BS);
+    boardCtx.lineTo(COLS * BS, r * BS);
+    boardCtx.stroke();
+  }
+  for (let c = 0; c <= COLS; c++) {
+    boardCtx.beginPath();
+    boardCtx.moveTo(c * BS, 0);
+    boardCtx.lineTo(c * BS, ROWS * BS);
+    boardCtx.stroke();
+  }
+
+  // Board cells
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = board[r][c];
+      if (cell) {
+        let color = cell.color;
+        if (cell._flash) color = '#ffffff';
+        if (cell.poisoned) color = '#555';
+        drawBlock(boardCtx, c, r, color, cell.poisoned ? '☠' : null);
+      }
+    }
+  }
+
+  // UniCredit cells
+  for (const uc of unicreditCells) {
+    drawBlock(boardCtx, uc.x, uc.y, '#666', '🔒', true);
+    if (uc.x + 1 < COLS) {
+      drawBlock(boardCtx, uc.x + 1, uc.y, '#666', null, true);
+    }
+  }
+
+  // Hotfix highlight
+  if (hotfixCell && chaosActive.hotfix) {
+    const phase = Math.floor(Date.now() / 200) % 2;
+    const hc = hotfixCell;
+    boardCtx.strokeStyle = phase ? '#FF0000' : '#FF6600';
+    boardCtx.lineWidth = 3;
+    boardCtx.strokeRect(hc.x * BS + 1, hc.y * BS + 1, BS - 2, BS - 2);
+  }
+
+  // Buggy cells highlight
+  for (const bc of buggyCells) {
+    boardCtx.strokeStyle = '#FF0000';
+    boardCtx.lineWidth = 2;
+    boardCtx.strokeRect(bc.x * BS + 1, bc.y * BS + 1, BS - 2, BS - 2);
+    boardCtx.fillStyle = 'rgba(255,0,0,0.2)';
+    boardCtx.fillRect(bc.x * BS + 1, bc.y * BS + 1, BS - 2, BS - 2);
+    boardCtx.fillStyle = '#FF0000';
+    boardCtx.font = '14px Arial';
+    boardCtx.textAlign = 'center';
+    boardCtx.fillText('🐛', bc.x * BS + BS/2, bc.y * BS + BS/2 + 5);
+  }
+
+  // Ghost piece
+  if (currentPiece && !modalOpen) {
+    const ghostY = getGhostY();
+    const s = currentPiece.shape;
+    boardCtx.globalAlpha = 0.22;
+    for (let r = 0; r < s.length; r++) {
+      for (let c = 0; c < s[r].length; c++) {
+        if (s[r][c]) {
+          boardCtx.fillStyle = currentPiece.color;
+          boardCtx.fillRect((currentPiece.x + c) * BS + 2, (ghostY + r) * BS + 2, BS - 4, BS - 4);
+        }
+      }
+    }
+    boardCtx.globalAlpha = 1;
+  }
+
+  // Current piece
+  if (currentPiece && !modalOpen) {
+    const s = currentPiece.shape;
+    for (let r = 0; r < s.length; r++) {
+      for (let c = 0; c < s[r].length; c++) {
+        if (s[r][c]) {
+          drawBlock(boardCtx, currentPiece.x + c, currentPiece.y + r, currentPiece.color);
+        }
+      }
+    }
+  }
+}
+
+function drawBlock(ctx, col, row, color, label = null, dashed = false) {
+  const x = col * BS, y = row * BS;
+  // Main fill
+  ctx.fillStyle = color;
+  ctx.fillRect(x + 1, y + 1, BS - 2, BS - 2);
+  // Highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.22)';
+  ctx.fillRect(x + 2, y + 2, BS - 4, 4);
+  ctx.fillRect(x + 2, y + 2, 4, BS - 4);
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(x + BS - 5, y + 3, 3, BS - 5);
+  ctx.fillRect(x + 3, y + BS - 5, BS - 5, 3);
+
+  if (dashed) {
+    ctx.strokeStyle = '#FFD100';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,4]);
+    ctx.strokeRect(x + 1, y + 1, BS - 2, BS - 2);
+    ctx.setLineDash([]);
+  }
+
+  if (label) {
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + BS / 2, y + BS / 2);
+  }
+}
+
+function drawNextPiece() {
+  if (!nextPiece) return;
+  nextCtx.fillStyle = '#0D0D1E';
+  nextCtx.fillRect(0, 0, 120, 100);
+  const s = nextPiece.shape;
+  const bw = 22;
+  const offX = Math.floor((120 - s[0].length * bw) / 2);
+  const offY = Math.floor((100 - s.length * bw) / 2);
+  for (let r = 0; r < s.length; r++) {
+    for (let c = 0; c < s[r].length; c++) {
+      if (s[r][c]) {
+        nextCtx.fillStyle = nextPiece.color;
+        nextCtx.fillRect(offX + c * bw + 1, offY + r * bw + 1, bw - 2, bw - 2);
+        nextCtx.fillStyle = 'rgba(255,255,255,0.22)';
+        nextCtx.fillRect(offX + c * bw + 2, offY + r * bw + 2, bw - 4, 3);
+      }
+    }
+  }
+  nextCtx.fillStyle = '#888';
+  nextCtx.font = '10px Arial';
+  nextCtx.textAlign = 'center';
+  nextCtx.fillText(PIECE_NAMES[nextPiece.type] || '', 60, 92);
+}
+
+// ============================================================
+// UI UPDATES
+// ============================================================
+function updateUI() {
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('linesDisplay').textContent = linesCleared;
+  document.getElementById('sprintDisplay').textContent = sprint;
+  document.getElementById('sprintLabel').textContent = `Sprint ${sprint} — Q2 2026 Release`;
+  const hearts = '❤️'.repeat(Math.max(0, lives));
+  document.getElementById('livesDisplay').textContent = hearts || '💀';
+}
+
+let toastTimeout = null;
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => { t.style.display = 'none'; }, duration);
+}
+
+function setStatus(msg) {
+  document.getElementById('statusLabel').textContent = msg;
+}
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+function gameLoop(timestamp) {
+  if (!gameRunning) return;
+  if (gamePaused || modalOpen) {
+    lastFall = timestamp;
+    animFrame = requestAnimationFrame(gameLoop);
+    drawBoard();
+    return;
+  }
+
+  const currentSpeed = chaosActive.speedRush ? fallSpeed / 3 : (bugGracePeriod ? 99999 : fallSpeed);
+  if (timestamp - lastFall > currentSpeed) {
+    lastFall = timestamp;
+    moveDown();
+  }
+
+  // UniCredit score drain
+  if (unicreditCells.length > 0) {
+    score = Math.max(0, score - 1/60);
+    updateUI();
+  }
+
+  drawBoard();
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function moveDown() {
+  if (!currentPiece) return;
+  if (isValid(currentPiece, 0, 1)) {
+    currentPiece.y++;
+  } else {
+    const piece = currentPiece;
+    currentPiece = null;
+    placePiece(piece);
+  }
+}
+
+// ============================================================
+// CONTROLS
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  if (!gameRunning || modalOpen) return;
+  switch (e.key) {
+    case 'ArrowLeft':
+      e.preventDefault();
+      if (currentPiece && isValid(currentPiece, -1, 0)) { currentPiece.x--; playMove(); }
+      break;
+    case 'ArrowRight':
+      e.preventDefault();
+      if (currentPiece && isValid(currentPiece, 1, 0)) { currentPiece.x++; playMove(); }
+      break;
+    case 'ArrowUp':
+      e.preventDefault();
+      if (currentPiece) {
+        const rotated = rotatePiece(currentPiece);
+        if (isValid(rotated, 0, 0, rotated.shape)) {
+          currentPiece = rotated;
+          playRotate();
+        } else if (isValid(rotated, 1, 0, rotated.shape)) {
+          currentPiece = rotated; currentPiece.x++; playRotate();
+        } else if (isValid(rotated, -1, 0, rotated.shape)) {
+          currentPiece = rotated; currentPiece.x--; playRotate();
+        }
+      }
+      break;
+    case 'ArrowDown':
+      e.preventDefault();
+      if (currentPiece && isValid(currentPiece, 0, 1)) { currentPiece.y++; lastFall = performance.now(); playMove(); }
+      break;
+    case ' ':
+      e.preventDefault();
+      if (currentPiece) {
+        while (isValid(currentPiece, 0, 1)) currentPiece.y++;
+        const piece = currentPiece;
+        currentPiece = null;
+        placePiece(piece);
+      }
+      break;
+    case 'p':
+    case 'P':
+      togglePause();
+      break;
+  }
+});
+
+// Canvas click handler set up after DOM is ready (see DOMContentLoaded below)
+
+// ============================================================
+// CHAOS EVENTS
+// ============================================================
+const CHAOS_EVENTS = [
+  'priorityExplosion', 'adHocMemory', 'hotfixAlert',
+  'speedRush', 'bugReport', 'merchantBlocked',
+  'scopeCreep', 'qbrQuiz', 'unicreditDelay', 'minesweeper'
+];
+
+function shuffleChaos() {
+  const arr = [...CHAOS_EVENTS];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function scheduleChaos() {
+  chaosQueue = shuffleChaos();
+  nextChaosTime = Date.now() + 15000; // first at 15s
+  firstChaosTriggered = false;
+}
+
+function checkChaos() {
+  if (!gameRunning || gamePaused || modalOpen) return;
+  if (Date.now() >= nextChaosTime) {
+    triggerNextChaos();
+  }
+}
+
+function triggerNextChaos() {
+  if (chaosQueue.length === 0) chaosQueue = shuffleChaos();
+  const event = chaosQueue.shift();
+  triggerChaosEvent(event);
+  nextChaosTime = Date.now() + 20000 + Math.random() * 20000;
+}
+
+function triggerChaosEvent(event) {
+  playChaos();
+  switch(event) {
+    case 'priorityExplosion': chaosPriorityExplosion(); break;
+    case 'adHocMemory': chaosAdHocMemory(); break;
+    case 'hotfixAlert': chaosHotfixAlert(); break;
+    case 'speedRush': chaosSpeedRush(); break;
+    case 'bugReport': chaosBugReport(); break;
+    case 'merchantBlocked': chaosMerchantBlocked(); break;
+    case 'scopeCreep': chaosScopeCreep(); break;
+    case 'qbrQuiz': chaosQBRQuiz(); break;
+    case 'unicreditDelay': chaosUniCreditDelay(); break;
+    case 'minesweeper': chaosMinesweeper(); break;
+  }
+}
+
+// 1. Priority Explosion
+function chaosPriorityExplosion() {
+  showToast('💥 Stakeholder changed the roadmap. Again.', 3000);
+  setStatus('Priority Explosion!');
+  const numRows = 2 + Math.floor(Math.random());
+  const startRow = ROWS - numRows;
+  setTimeout(() => {
+    for (let r = startRow; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        board[r][c] = null;
+      }
+    }
+    score = Math.max(0, score - 200);
+    updateUI();
+    showToast('💥 Bottom rows destroyed! -200 pts', 2500);
+    setStatus('All Systems Go');
+  }, 800);
+}
+
+// 2. Ad Hoc Memory Game
+function chaosAdHocMemory() {
+  if (modalOpen) return;
+  showToast('🃏 Ad Hoc Task: Memory Card Game!', 2000);
+  openMemoryGame();
+}
+
+const CARD_ICONS = ['💳','💙','🔴','🍎','🤖','💚','🅿️','🛍️'];
+
+function openMemoryGame() {
+  modalOpen = true;
+  const overlay = document.getElementById('memoryOverlay');
+  overlay.style.display = 'flex';
+  const grid = document.getElementById('memoryGrid');
+  grid.innerHTML = '';
+  document.getElementById('memStatus').textContent = '';
+
+  // Create 16 cards (8 pairs)
+  let cards = [...CARD_ICONS, ...CARD_ICONS];
+  cards = cards.sort(() => Math.random() - 0.5);
+
+  let flipped = [];
+  let matched = 0;
+  let canFlip = true;
+  let timerVal = 30;
+  const timerEl = document.getElementById('memTimer');
+  timerEl.textContent = '30';
+
+  const cardEls = cards.map((icon, i) => {
+    const card = document.createElement('div');
+    card.className = 'mem-card';
+    card.innerHTML = `<div class="card-face">${icon}</div>`;
+    card.dataset.icon = icon;
+    card.dataset.idx = i;
+    card.addEventListener('click', () => {
+      if (!canFlip || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+      card.classList.add('flipped');
+      flipped.push({ el: card, icon });
+      if (flipped.length === 2) {
+        canFlip = false;
+        const [a, b] = flipped;
+        if (a.icon === b.icon) {
+          a.el.classList.add('matched');
+          b.el.classList.add('matched');
+          matched++;
+          flipped = [];
+          canFlip = true;
+          playBeep(660, 0.1, 'sine', 0.15);
+          if (matched === 8) {
+            clearInterval(memTimerInterval);
+            score += 50;
+            updateUI();
+            document.getElementById('memStatus').textContent = '✅ All pairs matched! +50 pts';
+            playWin();
+            setTimeout(closeMemoryGame, 1200);
+          }
+        } else {
+          setTimeout(() => {
+            a.el.classList.add('wrong');
+            b.el.classList.add('wrong');
+            setTimeout(() => {
+              a.el.classList.remove('flipped','wrong');
+              b.el.classList.remove('flipped','wrong');
+              flipped = [];
+              canFlip = true;
+            }, 400);
+          }, 600);
+          playBeep(180, 0.15, 'sawtooth', 0.1);
+        }
+      }
+    });
+    return card;
+  });
+
+  cardEls.forEach(c => grid.appendChild(c));
+
+  const memTimerInterval = setInterval(() => {
+    timerVal--;
+    timerEl.textContent = timerVal;
+    if (timerVal <= 0) {
+      clearInterval(memTimerInterval);
+      document.getElementById('memStatus').textContent = '⏰ Time up! Lost 1 life.';
+      loseLife('Failed the Ad Hoc task! ⏰');
+      setTimeout(closeMemoryGame, 1200);
+    }
+  }, 1000);
+
+  // store interval for cleanup
+  overlay._memTimerInterval = memTimerInterval;
+}
+
+function closeMemoryGame() {
+  const overlay = document.getElementById('memoryOverlay');
+  if (overlay._memTimerInterval) clearInterval(overlay._memTimerInterval);
+  overlay.style.display = 'none';
+  modalOpen = false;
+  setStatus('All Systems Go');
+}
+
+// 3. Hotfix Alert
+function chaosHotfixAlert() {
+  const placedCells = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] && !board[r][c].poisoned) placedCells.push({x:c,y:r});
+    }
+  }
+  if (placedCells.length === 0) { showToast('🔧 No blocks to hotfix (lucky!)'); return; }
+  hotfixCell = placedCells[Math.floor(Math.random() * placedCells.length)];
+  chaosActive.hotfix = true;
+  showToast('🚨 Payment Gateway Down! Click the flashing block!', 3000);
+  setStatus('Hotfix Required!');
+
+  hotfixTimeout = setTimeout(() => {
+    if (!chaosActive.hotfix) return;
+    chaosActive.hotfix = false;
+    // Poison adjacent blocks
+    const adj = [{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
+    for (const d of adj) {
+      const nx = hotfixCell.x + d.dx, ny = hotfixCell.y + d.dy;
+      if (nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS && board[ny][nx]) {
+        board[ny][nx].poisoned = true;
+        board[ny][nx].color = '#555';
+      }
+    }
+    hotfixCell = null;
+    showToast('💀 Gateway poisoned! Adjacent blocks corrupted!', 2500);
+    setStatus('All Systems Go');
+  }, 5000);
+}
+
+// 4. Speed Rush
+function chaosSpeedRush() {
+  chaosActive.speedRush = true;
+  showToast('⚡ CEO wants a demo NOW! Speed x3 for 20s', 3000);
+  setStatus('Sprint Review Speed Rush!');
+  if (speedRushTimeout) clearTimeout(speedRushTimeout);
+  speedRushTimeout = setTimeout(() => {
+    chaosActive.speedRush = false;
+    showToast('😮‍💨 Speed rush over. Back to normal.', 2000);
+    setStatus('All Systems Go');
+  }, 20000);
+}
+
+// 5. Bug Report
+function chaosBugReport() {
+  const placedCells = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] && !board[r][c].poisoned) placedCells.push({x:c,y:r});
+    }
+  }
+  if (placedCells.length < 3) { showToast('🐛 No blocks to bug (lucky!)'); return; }
+  const numBugs = 3 + Math.floor(Math.random() * 3);
+  const shuffled = placedCells.sort(() => Math.random() - 0.5).slice(0, numBugs);
+  buggyCells = [...shuffled];
+  buggyFixRequired = true;
+  bugGracePeriod = true;
+  showToast(`🐛 Bug Report! Kliknij ${numBugs} czerwone bloki — masz 8 sekund!`, 3500);
+  setStatus('Bug Report — Fix them fast!');
+  setTimeout(() => {
+    bugGracePeriod = false;
+    if (buggyFixRequired && buggyCells.length > 0) {
+      loseLife(`Bug slipped to production! 🐛 (${buggyCells.length} unfixed)`);
+      buggyCells = [];
+      buggyFixRequired = false;
+      setStatus('All Systems Go');
+    }
+  }, 8000);
+}
+
+// 6. Merchant Blocked
+function chaosMerchantBlocked() {
+  chaosActive.merchantBlocked = true;
+  showToast('🔒 Integration team unavailable. T-piece locked for 20s.', 3000);
+  setStatus('Merchant Onboarding Blocked!');
+  if (merchantBlockedTimeout) clearTimeout(merchantBlockedTimeout);
+  merchantBlockedTimeout = setTimeout(() => {
+    chaosActive.merchantBlocked = false;
+    showToast('✅ Integration team back! T-piece unlocked.', 2000);
+    setStatus('All Systems Go');
+  }, 20000);
+}
+
+// 7. Scope Creep
+function chaosScopeCreep() {
+  chaosActive.scopeCreep = true;
+  // Apply to current piece immediately
+  if (currentPiece) {
+    const scopedShape = applyScope(currentPiece.allRots[currentPiece.rotIndex]);
+    currentPiece = { ...currentPiece, shape: scopedShape, allRots: currentPiece.allRots.map(applyScope) };
+    // Clamp x so it doesn't go out of bounds
+    while (!isValid(currentPiece) && currentPiece.x > 0) currentPiece.x--;
+  }
+  showToast('📋 New requirements from business! Pieces doubled in width for 15s.', 3500);
+  setStatus('Scope Creep!');
+  if (scopeCreepTimeout) clearTimeout(scopeCreepTimeout);
+  scopeCreepTimeout = setTimeout(() => {
+    chaosActive.scopeCreep = false;
+    showToast('✅ Scope creep ended. Pieces normal again.', 2000);
+    setStatus('All Systems Go');
+  }, 15000);
+}
+
+// 8. QBR Quiz
+let qbrBars = [];
+let qbrCorrectIdx = -1;
+let qbrTimerInterval = null;
+
+function chaosQBRQuiz() {
+  if (modalOpen) return;
+  modalOpen = true;
+  const overlay = document.getElementById('qbrOverlay');
+  overlay.style.display = 'flex';
+  document.getElementById('qbrStatus').textContent = '';
+  showToast('📊 QBR Time! Click the highest metric bar!', 2000);
+  setStatus('QBR Quiz!');
+
+  const metrics = ['GMV', 'TPV', 'Conv. Rate', 'Active Merch.'];
+  // Assign heights (random but one clearly tallest)
+  const heights = metrics.map(() => 40 + Math.floor(Math.random() * 100));
+  // Make one clearly tallest
+  qbrCorrectIdx = Math.floor(Math.random() * 4);
+  heights[qbrCorrectIdx] = 160 + Math.floor(Math.random() * 30);
+
+  qbrBars = metrics.map((m, i) => ({ label: m, height: heights[i], idx: i }));
+  drawQBRChart(qbrBars);
+
+  let timerVal = 10;
+  const timerEl = document.getElementById('qbrTimer');
+  timerEl.textContent = '10';
+  if (qbrTimerInterval) clearInterval(qbrTimerInterval);
+  qbrTimerInterval = setInterval(() => {
+    timerVal--;
+    timerEl.textContent = timerVal;
+    if (timerVal <= 0) {
+      clearInterval(qbrTimerInterval);
+      document.getElementById('qbrStatus').textContent = '⏰ Too slow! Lost 1 life.';
+      loseLife('Missed the QBR deadline! ⏰');
+      setTimeout(closeQBR, 1200);
+    }
+  }, 1000);
+}
+
+function drawQBRChart(bars) {
+  const canvas = document.getElementById('qbrCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0D0D1E';
+  ctx.fillRect(0, 0, 380, 220);
+
+  const barW = 60, gap = 30, startX = 30, baseY = 195;
+  const barColors = ['#FFD100','#4285F4','#34A853','#EA4335'];
+
+  bars.forEach((bar, i) => {
+    const x = startX + i * (barW + gap);
+    const h = bar.height;
+    // Bar
+    ctx.fillStyle = barColors[i];
+    ctx.fillRect(x, baseY - h, barW, h);
+    // Shine
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.fillRect(x, baseY - h, 10, h);
+    // Label
+    ctx.fillStyle = '#fff';
+    ctx.font = '11px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(bar.label, x + barW / 2, baseY + 15);
+    // Value
+    ctx.fillStyle = '#FFD100';
+    ctx.font = 'bold 13px Arial';
+    ctx.fillText(Math.round(bar.height * 10), x + barW / 2, baseY - h - 6);
+    bar._x = x; bar._w = barW; bar._baseY = baseY;
+  });
+  // Axis
+  ctx.strokeStyle = '#FFD10066';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(25, 10); ctx.lineTo(25, baseY); ctx.lineTo(375, baseY); ctx.stroke();
+}
+
+document.getElementById('qbrCanvas').addEventListener('click', (e) => {
+  if (!modalOpen) return;
+  const canvas = document.getElementById('qbrCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  if (qbrBars.length === 0) return;
+
+  let clicked = -1;
+  for (const bar of qbrBars) {
+    if (mx >= bar._x && mx <= bar._x + bar._w && my >= bar._baseY - bar.height && my <= bar._baseY) {
+      clicked = bar.idx;
+      break;
+    }
+  }
+  if (clicked === -1) return;
+
+  clearInterval(qbrTimerInterval);
+  if (clicked === qbrCorrectIdx) {
+    score += 50;
+    updateUI();
+    document.getElementById('qbrStatus').textContent = '✅ Correct! +50 pts — You nailed the QBR!';
+    playWin();
+    setTimeout(closeQBR, 1200);
+  } else {
+    document.getElementById('qbrStatus').textContent = '❌ Wrong metric! Lost 1 life.';
+    loseLife('Wrong QBR answer! ❌');
+    setTimeout(closeQBR, 1200);
+  }
+});
+
+function closeQBR() {
+  document.getElementById('qbrOverlay').style.display = 'none';
+  modalOpen = false;
+  setStatus('All Systems Go');
+}
+
+// 9. UniCredit Delay
+function chaosUniCreditDelay() {
+  // Find empty spot near top
+  let placed = false;
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < COLS - 1; c++) {
+      if (!board[r][c] && !board[r][c+1]) {
+        unicreditCells.push({ x: c, y: r, time: Date.now() });
+        placed = true;
+        break;
+      }
+    }
+    if (placed) break;
+  }
+  if (!placed) {
+    showToast('🔒 UniCredit block has no space (lucky!)');
+    return;
+  }
+  showToast('🔒 UniCredit didn\'t deliver on time. Again. -1pt/sec for 30s', 3500);
+  setStatus('UniCredit Delay!');
+
+  setTimeout(() => {
+    unicreditCells = [];
+    setStatus('All Systems Go');
+    showToast('✅ UniCredit block removed (finally)', 2000);
+  }, 30000);
+}
+
+// ============================================================
+// 10. MINESWEEPER — Rozminuj napięcie w zespole
+// ============================================================
+const MINE_COLS = 7, MINE_ROWS = 6, MINE_COUNT = 6;
+let mineBoard = [];
+let mineRevealed = 0;
+let mineFlagged = 0;
+let mineTimerInterval = null;
+let mineGameOver = false;
+
+function chaosMinesweeper() {
+  if (modalOpen) return;
+  modalOpen = true;
+  showToast('💣 Konflikt w zespole! Rozminuj sytuację!', 2500);
+  setStatus('Minesweeper — Rozminuj napięcie!');
+  openMinesweeper();
+}
+
+function openMinesweeper() {
+  const overlay = document.getElementById('minesweeperOverlay');
+  overlay.style.display = 'flex';
+  mineGameOver = false;
+  mineRevealed = 0;
+
+  // Build board
+  mineBoard = Array.from({length: MINE_ROWS}, () =>
+    Array.from({length: MINE_COLS}, () => ({ mine: false, revealed: false, flagged: false, adj: 0 }))
+  );
+
+  // Place mines randomly
+  let placed = 0;
+  while (placed < MINE_COUNT) {
+    const r = Math.floor(Math.random() * MINE_ROWS);
+    const c = Math.floor(Math.random() * MINE_COLS);
+    if (!mineBoard[r][c].mine) { mineBoard[r][c].mine = true; placed++; }
+  }
+
+  // Calculate adjacency numbers
+  for (let r = 0; r < MINE_ROWS; r++) {
+    for (let c = 0; c < MINE_COLS; c++) {
+      if (mineBoard[r][c].mine) continue;
+      let count = 0;
+      for (let dr = -1; dr <= 1; dr++)
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = r+dr, nc = c+dc;
+          if (nr >= 0 && nr < MINE_ROWS && nc >= 0 && nc < MINE_COLS && mineBoard[nr][nc].mine) count++;
+        }
+      mineBoard[r][c].adj = count;
+    }
+  }
+
+  renderMineGrid();
+
+  document.getElementById('mineCount').textContent = MINE_COUNT;
+
+  let timerVal = 45;
+  document.getElementById('mineTimer').textContent = timerVal;
+  if (mineTimerInterval) clearInterval(mineTimerInterval);
+  mineTimerInterval = setInterval(() => {
+    if (mineGameOver) { clearInterval(mineTimerInterval); return; }
+    timerVal--;
+    document.getElementById('mineTimer').textContent = timerVal;
+    if (timerVal <= 0) {
+      clearInterval(mineTimerInterval);
+      mineGameOver = true;
+      document.getElementById('mineStatus').textContent = '⏰ Czas minął! Napięcie eksplodowało! -1 życie.';
+      revealAllMines();
+      renderMineGrid();
+      loseLife('Miny wybuchły! Konflikt eskalował! 💣');
+      setTimeout(closeMinesweeper, 1800);
+    }
+  }, 1000);
+}
+
+function renderMineGrid() {
+  const grid = document.getElementById('mineGrid');
+  grid.innerHTML = '';
+  for (let r = 0; r < MINE_ROWS; r++) {
+    for (let c = 0; c < MINE_COLS; c++) {
+      const cell = mineBoard[r][c];
+      const div = document.createElement('div');
+      div.style.cssText = `width:40px;height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;cursor:pointer;user-select:none;transition:background 0.1s;`;
+
+      if (cell.revealed) {
+        if (cell.mine) {
+          div.style.background = '#EA4335';
+          div.textContent = '💥';
+        } else {
+          div.style.background = '#0D0D1E';
+          div.style.border = '1px solid #333';
+          const colors = ['','#4285F4','#34A853','#EA4335','#9B59B6','#FF00FF','#00FFFF','#fff','#888'];
+          if (cell.adj > 0) {
+            div.textContent = cell.adj;
+            div.style.color = colors[cell.adj] || '#fff';
+          }
+        }
+      } else if (cell.flagged) {
+        div.style.background = '#FFD10033';
+        div.style.border = '1px solid #FFD100';
+        div.textContent = '🚩';
+      } else {
+        div.style.background = '#1A2540';
+        div.style.border = '1px solid #334';
+        div.onmouseover = () => div.style.background = '#243060';
+        div.onmouseout = () => div.style.background = '#1A2540';
+      }
+
+      if (!cell.revealed && !mineGameOver) {
+        div.addEventListener('click', () => mineClick(r, c));
+        div.addEventListener('contextmenu', (e) => { e.preventDefault(); mineFlag(r, c); });
+      }
+
+      grid.appendChild(div);
+    }
+  }
+}
+
+function mineClick(r, c) {
+  if (mineGameOver) return;
+  const cell = mineBoard[r][c];
+  if (cell.revealed || cell.flagged) return;
+
+  if (cell.mine) {
+    cell.revealed = true;
+    mineGameOver = true;
+    clearInterval(mineTimerInterval);
+    revealAllMines();
+    renderMineGrid();
+    document.getElementById('mineStatus').textContent = '💥 Mina! Napięcie eksplodowało! -1 życie.';
+    playLoseLife();
+    loseLife('Trafiłeś na minę! Konflikt eskalował! 💣');
+    setTimeout(closeMinesweeper, 1800);
+    return;
+  }
+
+  mineFloodReveal(r, c);
+  renderMineGrid();
+
+  const total = MINE_COLS * MINE_ROWS - MINE_COUNT;
+  if (mineRevealed >= total) {
+    mineGameOver = true;
+    clearInterval(mineTimerInterval);
+    document.getElementById('mineStatus').textContent = '✅ Napięcie rozładowane! Zespół zjednoczony! +75 pts';
+    score += 75;
+    updateUI();
+    playWin();
+    setTimeout(closeMinesweeper, 1800);
+  }
+}
+
+function mineFloodReveal(r, c) {
+  if (r < 0 || r >= MINE_ROWS || c < 0 || c >= MINE_COLS) return;
+  const cell = mineBoard[r][c];
+  if (cell.revealed || cell.mine || cell.flagged) return;
+  cell.revealed = true;
+  mineRevealed++;
+  if (cell.adj === 0) {
+    for (let dr = -1; dr <= 1; dr++)
+      for (let dc = -1; dc <= 1; dc++)
+        if (dr !== 0 || dc !== 0) mineFloodReveal(r+dr, c+dc);
+  }
+}
+
+function mineFlag(r, c) {
+  if (mineGameOver) return;
+  const cell = mineBoard[r][c];
+  if (cell.revealed) return;
+  cell.flagged = !cell.flagged;
+  renderMineGrid();
+}
+
+function revealAllMines() {
+  for (let r = 0; r < MINE_ROWS; r++)
+    for (let c = 0; c < MINE_COLS; c++)
+      if (mineBoard[r][c].mine) mineBoard[r][c].revealed = true;
+}
+
+function closeMinesweeper() {
+  if (mineTimerInterval) clearInterval(mineTimerInterval);
+  document.getElementById('minesweeperOverlay').style.display = 'none';
+  document.getElementById('mineStatus').textContent = '';
+  modalOpen = false;
+  setStatus('All Systems Go');
+}
+
+// ============================================================
+// LIVES & GAME OVER
+// ============================================================
+function loseLife(msg) {
+  lives--;
+  updateUI();
+  playLoseLife();
+  showToast(`💔 ${msg} Lives: ${'❤️'.repeat(Math.max(0,lives))}`, 3000);
+  if (lives <= 0) {
+    setTimeout(triggerGameOver, 800);
+  }
+}
+
+function triggerGameOver() {
+  gameRunning = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  saveScore(score);
+  document.getElementById('finalScore').textContent = score + ' pts';
+  document.getElementById('lbFinal').innerHTML = buildLeaderboardHTML();
+  document.getElementById('gameOverOverlay').style.display = 'flex';
+  playChaos();
+}
+
+function triggerSprintComplete() {
+  gameRunning = false;
+  sprint++;
+  fallSpeed = Math.max(150, fallSpeed - 80);
+  document.getElementById('sprintScore').textContent = score + ' pts';
+  document.getElementById('nextSprintNum').textContent = sprint;
+  document.getElementById('sprintOverlay').style.display = 'flex';
+  document.getElementById('sprintMsg').textContent = `Sprint ${sprint-1} complete! Speed increased for Sprint ${sprint}.`;
+  playWin();
+}
+
+function continueGame() {
+  document.getElementById('sprintOverlay').style.display = 'none';
+  gameRunning = true;
+  lastFall = performance.now();
+  updateUI();
+  animFrame = requestAnimationFrame(gameLoop);
+  spawnNext();
+  showToast(`🚀 Sprint ${sprint} started!`, 2000);
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function getLeaderboard() {
+  try {
+    return JSON.parse(localStorage.getItem('inpostpo_lb') || '[]');
+  } catch { return []; }
+}
+
+function saveScore(pts) {
+  const lb = getLeaderboard();
+  lb.push({ score: pts, date: new Date().toLocaleDateString() });
+  lb.sort((a,b) => b.score - a.score);
+  lb.splice(5);
+  localStorage.setItem('inpostpo_lb', JSON.stringify(lb));
+}
+
+function buildLeaderboardHTML() {
+  const lb = getLeaderboard();
+  if (lb.length === 0) return '<div class="lb-row">No scores yet</div>';
+  return lb.map((e,i) => `
+    <div class="lb-row">
+      <span class="lb-rank">#${i+1}</span>
+      <span>${e.score} pts</span>
+      <span style="color:#888;font-size:0.8rem">${e.date}</span>
+    </div>`).join('');
+}
+
+function renderLeaderboardPreview() {
+  const lb = getLeaderboard();
+  const el = document.getElementById('lbPreview');
+  if (lb.length === 0) {
+    el.innerHTML = '<div class="lb-row" style="justify-content:center;color:#888;">No scores yet — be first!</div>';
+    return;
+  }
+  el.innerHTML = lb.slice(0,5).map((e,i) => `
+    <div class="lb-row">
+      <span class="lb-rank">#${i+1}</span>
+      <span>${e.score} pts</span>
+      <span style="color:#888;font-size:0.8rem">${e.date}</span>
+    </div>`).join('');
+}
+
+// ============================================================
+// GAME LIFECYCLE
+// ============================================================
+function startGame() {
+  // Reset state
+  score = 0; lives = 3; sprint = 1; linesCleared = 0; totalLines = 0;
+  fallSpeed = 800;
+  chaosActive = {};
+  unicreditCells = []; buggyCells = []; hotfixCell = null;
+  buggyFixRequired = false; bugGracePeriod = false;
+  firstChaosTriggered = false;
+
+  // Clear any running timeouts
+  [speedRushTimeout, scopeCreepTimeout, merchantBlockedTimeout, hotfixTimeout].forEach(t => { if(t) clearTimeout(t); });
+  speedRushTimeout = scopeCreepTimeout = merchantBlockedTimeout = hotfixTimeout = null;
+
+  createBoard();
+
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('gameScreen').style.display = 'flex';
+  document.getElementById('gameOverOverlay').style.display = 'none';
+  document.getElementById('sprintOverlay').style.display = 'none';
+  document.getElementById('pauseOverlay').style.display = 'none';
+
+  boardCanvas = document.getElementById('boardCanvas');
+  boardCtx = boardCanvas.getContext('2d');
+  nextCanvas = document.getElementById('nextCanvas');
+  nextCtx = nextCanvas.getContext('2d');
+
+  // Also reassign click handler in case of restart
+  boardCanvas.onclick = (e) => {
+    if (!gameRunning) return;
+    const rect = boardCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const col = Math.floor(mx / BS);
+    const row = Math.floor(my / BS);
+
+    if (chaosActive.hotfix && hotfixCell) {
+      if (col === hotfixCell.x && row === hotfixCell.y) {
+        chaosActive.hotfix = false;
+        if (hotfixTimeout) { clearTimeout(hotfixTimeout); hotfixTimeout = null; }
+        hotfixCell = null;
+        score += 30;
+        updateUI();
+        showToast('🔧 Gateway fixed! +30 pts');
+        playWin();
+        setStatus('All Systems Go');
+      }
+      return;
+    }
+
+    if (buggyFixRequired && buggyCells.length > 0) {
+      const idx = buggyCells.findIndex(b => b.x === col && b.y === row);
+      if (idx !== -1) {
+        buggyCells.splice(idx, 1);
+        if (board[row] && board[row][col]) board[row][col].bugged = false;
+        playBeep(660, 0.08, 'sine', 0.15);
+        showToast(`🐛 Bug fixed! ${buggyCells.length} remaining`);
+        if (buggyCells.length === 0) {
+          buggyFixRequired = false;
+          bugGracePeriod = false;
+          showToast('✅ All bugs fixed! +50 pts');
+          score += 50;
+          updateUI();
+          setStatus('All Systems Go');
+        }
+      }
+    }
+  };
+
+  nextPiece = createPiece();
+  spawnNext();
+  updateUI();
+
+  scheduleChaos();
+  gameRunning = true;
+  gamePaused = false;
+  modalOpen = false;
+  lastFall = performance.now();
+  gameStartTime = Date.now();
+
+  // Chaos check interval
+  if (window._chaosInterval) clearInterval(window._chaosInterval);
+  window._chaosInterval = setInterval(() => {
+    if (gameRunning) checkChaos();
+  }, 1000);
+
+  if (animFrame) cancelAnimationFrame(animFrame);
+  animFrame = requestAnimationFrame(gameLoop);
+}
+
+function togglePause() {
+  if (!gameRunning) return;
+  gamePaused = !gamePaused;
+  const po = document.getElementById('pauseOverlay');
+  po.style.display = gamePaused ? 'flex' : 'none';
+  if (!gamePaused) {
+    lastFall = performance.now();
+    animFrame = requestAnimationFrame(gameLoop);
+  }
+}
+
+function restartGame() {
+  document.getElementById('gameOverOverlay').style.display = 'none';
+  startGame();
+}
+
+function goHome() {
+  gameRunning = false;
+  if (animFrame) cancelAnimationFrame(animFrame);
+  document.getElementById('gameScreen').style.display = 'none';
+  document.getElementById('gameOverOverlay').style.display = 'none';
+  document.getElementById('sprintOverlay').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+  renderLeaderboardPreview();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderLeaderboardPreview();
+
+// Assign canvas refs for initial onclick binding
+boardCanvas = document.getElementById('boardCanvas');
+
+// Keyboard hint for start screen
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !gameRunning) startGame();
+});
+</script>
+</body>
+</html>
