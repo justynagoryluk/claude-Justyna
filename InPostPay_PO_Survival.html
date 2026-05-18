@@ -1392,6 +1392,8 @@ function chaosQBRQuiz() {
   const overlay = document.getElementById('qbrOverlay');
   overlay.style.display = 'flex';
   document.getElementById('qbrStatus').textContent = '';
+  const qbrCanvasEl = document.getElementById('qbrCanvas');
+  qbrCanvasEl.onclick = qbrCanvasClick;
   showToast('📊 QBR Time! Click the highest metric bar!', 2000);
   setStatus('QBR Quiz!');
 
@@ -1456,7 +1458,7 @@ function drawQBRChart(bars) {
   ctx.beginPath(); ctx.moveTo(25, 10); ctx.lineTo(25, baseY); ctx.lineTo(375, baseY); ctx.stroke();
 }
 
-document.getElementById('qbrCanvas').addEventListener('click', (e) => {
+function qbrCanvasClick(e) {
   if (!modalOpen) return;
   const canvas = document.getElementById('qbrCanvas');
   const rect = canvas.getBoundingClientRect();
@@ -1485,7 +1487,7 @@ document.getElementById('qbrCanvas').addEventListener('click', (e) => {
     loseLife('Wrong QBR answer! ❌');
     setTimeout(closeQBR, 1200);
   }
-});
+}
 
 function closeQBR() {
   document.getElementById('qbrOverlay').style.display = 'none';
@@ -1914,14 +1916,12 @@ function goHome() {
 }
 
 // ============================================================
-// INIT
+// INIT — script is at bottom of body so DOM is already ready
 // ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  try { renderLeaderboardPreview(); } catch(e) {}
-  boardCanvas = document.getElementById('boardCanvas');
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !gameRunning) startGame();
-  });
+try { renderLeaderboardPreview(); } catch(e) {}
+boardCanvas = document.getElementById('boardCanvas');
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !gameRunning) startGame();
 });
 </script>
 </body>
